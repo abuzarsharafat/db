@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .error {
+            color: red;
+        }
+        #confirmation {
+            margin-top: 10px;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .button-group {
+            margin-top: 20px;
+        }
+        .button-group button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Data Upload</h1>
+    <div class="form-group">
+        <label for="mhid">Mausak Hope ID:</label>
+        <input type="text" id="mhid">
+        <button id="searchButton" onclick="searchMHID()">Search</button>
+        <div id="confirmation"></div>
+    </div>
+    <div class="form-group">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount">
+    </div>
+    <div class="form-group">
+        <label for="donationType">Donation Type:</label>
+        <select id="donationType">
+            <option value="sadqa">Sadqa</option>
+            <option value="zakat">Zakat</option>
+            <option value="khairat">Khairat</option>
+        </select>
+    </div>
+    <div class="form-group">
+        <label for="donationDate">Donation Date:</label>
+        <input type="date" id="donationDate">
+    </div>
+
+    <button onclick="verifyData()">Verify</button>
+
+    <div id="tableContainer"></div>
+
+    <script>
+        // Set default value for donation date field
+        document.getElementById('donationDate').value = getDefaultDate();
+
+        const data = {
+            "MH0001": "Atif Zaheer",
+            "MH0002": "Affan Khan",
+            "MH0003": "Muhammad Dawood",
+            "MH0004": "Faheem Iqbal",
+            "MH0005": "Muhammad Shahid",
+            "MH0006": "Arslan Ahmad",
+            "MH0007": "Kinan Ahmad",
+            "MH0008": "Hassan Hameed",
+            "MH0009": "Mansoor Ahmad",
+            "MH0010": "Ahsan Khan",
+            "MH0011": "Muhammad Ikram Butt",
+            "MH0012": "Abuzar Sharafat",
+            "MH0013": "Asif Sarwar",
+            "MH0014": "Usman Afzal",
+            "MH0015": "Abrar Amin",
+            "MH0016": "Abdul Rauf",
+            "MH0017": "Fawad",
+            "MH0018": "Abdul Saboor",
+            "MH0019": "Umar Bhatti",
+            "MH0020": "Shafqat",
+            "MH0021": "Abdul Rehman",
+            "MH0022": "Ali bin khalid",
+            "MH0023": "Hashim Shahid",
+            "MH0024": "Waqar Butt",
+            "MH0025": "Ahmed Hafeez",
+            "MH0026": "Salman khan",
+            "MH0027": "Ahmad I8",
+            "MH0028": "Atif Hussian",
+            "MH0029": "Jaffar Altaf",
+            "MH0030": "Fahad Khan",
+            "MH0031": "Ahsan Shahbaz",
+            "MH0032": "Muhammad Zaheer",
+            "MH0033": "Malik Imran",
+            "MH0034": "Usman Shafiq",
+            "MH0035": "Zeeshan Anwar",
+            "MH0036": "Tipu sultan",
+            "MH0037": "Mohsin Khan",
+            "MH0038": "Shahid AM.Hafiz",
+            "MH0039": "Tahir Razzaq",
+            "MH0040": "Zaheer Asghar",
+            "MH0041": "Arslan tariq",
+            "MH0042": "Suleman Nawaz",
+            "MH0043": "Toseef",
+            "MH0044": "Shoaib Garrison",
+            "MH0045": "Faheem Latif",
+            "MH0046": "M Jawad Amjad",
+            "MH0047": "Bilal Shafqat",
+            "MH0048": "Muhammad Fakhir",
+            "MH0049": "Basim",
+            "MH0050": "Ali Hassan",
+            "MH0051": "Sumbal",
+            "MH0052": "Asim Zaheer",
+            "MH0053": "Awais Shahid Ent",
+            "MH0054": "Farhan Ahsan",
+            "MH0055": "Muhammad Hussain",
+            "MH0056": "Ahmad Mehmood",
+            "MH0057": "Umais",
+            "MH0058": "Amir Mushtaq",
+            "MH0059": "Khurram Bhai",
+            "MH0060": "Abubakar",
+            "MH0061": "Adil Sarwar",
+            "MH0062": "Mujeeb khalid",
+            "MH0063": "Bashir Ahmad",
+            "MH0064": "Ahmad Gulzar",
+            "MH0065": "Rizwan ud din",
+            "MH0066": "kamran Rafi",
+            "MH0067": "MahaJabeen",
+            "MH0068": "Saad Jutt",
+            "MH0069": "Ayaz Ayub"
+        };
+
+        document.getElementById('mhid').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                document.getElementById('searchButton').click();
+            }
+        });
+
+        function searchMHID() {
+            const mhidInput = document.getElementById('mhid').value.trim();
+            const confirmation = document.getElementById('confirmation');
+
+            // Normalize input
+            let mhid = mhidInput.toUpperCase();
+            if (!mhid.startsWith('MH')) {
+                mhid = `MH${mhid.padStart(4, '0')}`;
+            }
+
+            const name = data[mhid];
+            if (name) {
+                confirmation.innerHTML = `Name: ${name}`;
+                confirmation.classList.remove('error');
+            } else {
+                confirmation.innerHTML = 'MHID does not exist';
+                confirmation.classList.add('error');
+            }
+        }
+
+        function getDefaultDate() {
+            const today = new Date();
+            const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const day = String(firstDayOfMonth.getDate()).padStart(2, '0');
+            const month = String(firstDayOfMonth.getMonth() + 1).padStart(2, '0');
+            const year = firstDayOfMonth.getFullYear();
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatDate(dateString) {
+            const parts = dateString.split('-');
+            const day = parts[2];
+            const month = parts[1];
+            const year = parts[0];
+            return `${day}/${month}/${year}`;
+        }
+
+        function verifyData() {
+            const mhidInput = document.getElementById('mhid').value.trim();
+            let mhid = mhidInput.toUpperCase();
+            if (mhid.startsWith('MH')) {
+                mhid = mhid.slice(2); // Remove "MH" prefix
+            }
+            mhid = parseInt(mhid); // Convert to integer to remove leading zeros
+
+            const name = data[`MH${mhid.toString().padStart(4, '0')}`]; // Retrieve name from data object
+            const amount = document.getElementById('amount').value.trim();
+            const donationType = document.getElementById('donationType').value.trim();
+            const donationDate = formatDate(document.getElementById('donationDate').value.trim());
+
+            if (!name || amount === '' || donationType === '' || donationDate === '') {
+                alert('Please fill in all fields or check MHID.');
+                return;
+            }
+
+            const tableContainer = document.getElementById('tableContainer');
+            tableContainer.innerHTML = '';
+
+            const table = document.createElement('table');
+            const header = table.createTHead();
+            const row = header.insertRow();
+            const headers = ['ID', 'Name', 'Amount', 'Donation Type', 'Donation Date'];
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.textContent = headerText;
+                row.appendChild(th);
+            });
+
+            const tbody = table.createTBody();
+            const dataRow = tbody.insertRow();
+            const cell1 = dataRow.insertCell();
+            cell1.textContent = mhid; // Display ID without "MH" prefix
+            const cell2 = dataRow.insertCell();
+            cell2.textContent = name; // Display name in the table
+            const cell3 = dataRow.insertCell();
+            cell3.textContent = amount;
+            const cell4 = dataRow.insertCell();
+            cell4.textContent = donationType;
+            const cell5 = dataRow.insertCell();
+            cell5.textContent = donationDate; // Display formatted date in dd/mm/yyyy format
+
+            tableContainer.appendChild(table);
+
+            // Add buttons
+            const buttonGroup = document.createElement('div');
+            buttonGroup.classList.add('button-group');
+            const updateButton = document.createElement('button');
+            updateButton.textContent = 'Update';
+            updateButton.addEventListener('click', function() {
+                // Add your update logic here
+                alert('Update functionality to be implemented.');
+            });
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = 'Cancel';
+            cancelButton.addEventListener('click', function() {
+                // Refresh the page
+                location.reload();
+            });
+
+            buttonGroup.appendChild(updateButton);
+            buttonGroup.appendChild(cancelButton);
+            tableContainer.appendChild(buttonGroup);
+        }
+      
+
+    </script>
+</body>
+</html>
